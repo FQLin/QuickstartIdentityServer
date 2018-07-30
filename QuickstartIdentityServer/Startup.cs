@@ -46,6 +46,7 @@ namespace QuickstartIdentityServer
                 app.UseDeveloperExceptionPage();
             }
 
+            //注入管道，用来处理对Identityserver地址的请求
             app.UseIdentityServer();
 
             app.UseStaticFiles();
