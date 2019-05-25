@@ -21,7 +21,7 @@ namespace IdentityServer4.Extensions
         {
             if (list == null)
             {
-                return "";
+                return string.Empty;
             }
 
             var sb = new StringBuilder(100);
@@ -90,7 +90,7 @@ namespace IdentityServer4.Extensions
         [DebuggerStepThrough]
         public static string EnsureLeadingSlash(this string url)
         {
-            if (!url.StartsWith("/"))
+            if (url != null && !url.StartsWith("/"))
             {
                 return "/" + url;
             }
@@ -101,7 +101,7 @@ namespace IdentityServer4.Extensions
         [DebuggerStepThrough]
         public static string EnsureTrailingSlash(this string url)
         {
-            if (!url.EndsWith("/"))
+            if (url != null && !url.EndsWith("/"))
             {
                 return url + "/";
             }
@@ -247,7 +247,16 @@ namespace IdentityServer4.Extensions
         {
             if (url != null)
             {
-                var uri = new Uri(url);
+                Uri uri;
+                try
+                {
+                    uri = new Uri(url);
+                }
+                catch (Exception)
+                {
+                    return null;
+                }
+
                 if (uri.Scheme == "http" || uri.Scheme == "https")
                 {
                     return $"{uri.Scheme}://{uri.Authority}";

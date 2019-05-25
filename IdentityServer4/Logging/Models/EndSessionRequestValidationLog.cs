@@ -2,12 +2,12 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 
+using System.Collections.Generic;
 using IdentityModel;
 using IdentityServer4.Extensions;
 using IdentityServer4.Validation;
-using System.Collections.Generic;
 
-namespace IdentityServer4.Logging
+namespace IdentityServer4.Logging.Models
 {
     internal class EndSessionRequestValidationLog
     {
@@ -22,7 +22,7 @@ namespace IdentityServer4.Logging
 
         public EndSessionRequestValidationLog(ValidatedEndSessionRequest request)
         {
-            Raw = request.Raw.ToDictionary();
+            Raw = request.Raw.ToScrubbedDictionary(OidcConstants.EndSessionRequest.IdTokenHint);
 
             SubjectId = "unknown";
             if (request.Subject != null)

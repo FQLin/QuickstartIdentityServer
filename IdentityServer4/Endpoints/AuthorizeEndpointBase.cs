@@ -10,7 +10,7 @@ using IdentityServer4.Endpoints.Results;
 using IdentityServer4.Events;
 using IdentityServer4.Extensions;
 using IdentityServer4.Hosting;
-using IdentityServer4.Logging;
+using IdentityServer4.Logging.Models;
 using IdentityServer4.Models;
 using IdentityServer4.ResponseHandling;
 using IdentityServer4.Services;
@@ -81,7 +81,7 @@ namespace IdentityServer4.Endpoints
             var interactionResult = await _interactionGenerator.ProcessInteractionAsync(request, consent);
             if (interactionResult.IsError)
             {
-                return await CreateErrorResultAsync("Interaction generator error", request, interactionResult.Error, logError: false);
+                return await CreateErrorResultAsync("Interaction generator error", request, interactionResult.Error, interactionResult.ErrorDescription, false);
             }
             if (interactionResult.IsLogin)
             {
@@ -120,7 +120,7 @@ namespace IdentityServer4.Endpoints
             if (request != null)
             {
                 var details = new AuthorizeRequestValidationLog(request);
-                Logger.LogInformation("{validationDetails}", details);
+                Logger.LogInformation("{@validationDetails}", details);
             }
 
             // TODO: should we raise a token failure event for all errors to the authorize endpoint?
@@ -137,13 +137,13 @@ namespace IdentityServer4.Endpoints
         private void LogRequest(ValidatedAuthorizeRequest request)
         {
             var details = new AuthorizeRequestValidationLog(request);
-            Logger.LogInformation(nameof(ValidatedAuthorizeRequest) + Environment.NewLine + "{validationDetails}", details);
+            Logger.LogDebug(nameof(ValidatedAuthorizeRequest) + Environment.NewLine + "{@validationDetails}", details);
         }
 
         private void LogResponse(AuthorizeResponse response)
         {
             var details = new AuthorizeResponseLog(response);
-            Logger.LogInformation("Authorize endpoint response" + Environment.NewLine + "{response}", details);
+            Logger.LogDebug("Authorize endpoint response" + Environment.NewLine + "{@details}", details);
         }
 
         private void LogTokens(AuthorizeResponse response)

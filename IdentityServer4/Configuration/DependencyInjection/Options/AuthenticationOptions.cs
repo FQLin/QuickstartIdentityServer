@@ -12,6 +12,12 @@ namespace IdentityServer4.Configuration
     public class AuthenticationOptions
     {
         /// <summary>
+        /// Sets the cookie authenitcation scheme confgured by the host used for interactive users. If not set, the scheme will inferred from the host's default authentication scheme.
+        /// This setting is typically used when AddPolicyScheme is used in the host as the default scheme.
+        /// </summary>
+        public string CookieAuthenticationScheme { get; set; }
+
+        /// <summary>
         /// Sets the cookie lifetime (only effective if the IdentityServer-provided cookie handler is used)
         /// </summary>
         public TimeSpan CookieLifetime { get; set; } = Constants.DefaultCookieTimeSpan;
@@ -37,6 +43,8 @@ namespace IdentityServer4.Configuration
         /// <summary>
         /// Gets or sets the timeout on the back channel logout HTTP call.
         /// </summary>
+        // todo: remove in 3.0
+        [Obsolete("Replaced by the use of BackChannelLogoutHttpClient. Use the new AddBackChannelLogoutHttpClient to configure the HttpClient settings.")]
         public TimeSpan BackChannelLogoutTimeOut { get; set; } = TimeSpan.FromSeconds(30);
 
         /// <summary>

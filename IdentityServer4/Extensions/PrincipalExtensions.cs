@@ -24,7 +24,7 @@ namespace IdentityServer4.Extensions
         [DebuggerStepThrough]
         public static DateTime GetAuthenticationTime(this IPrincipal principal)
         {
-            return ((int)principal.GetAuthenticationTimeEpoch()).ToDateTimeFromEpoch();
+            return DateTimeOffset.FromUnixTimeSeconds(principal.GetAuthenticationTimeEpoch()).UtcDateTime;
         }
 
         /// <summary>
@@ -107,7 +107,7 @@ namespace IdentityServer4.Extensions
             var sub = principal.FindFirst(JwtClaimTypes.Subject);
             if (sub != null) return sub.Value;
 
-            return "";
+            return string.Empty;
         }
 
         /// <summary>

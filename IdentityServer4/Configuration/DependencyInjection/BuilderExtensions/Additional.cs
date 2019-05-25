@@ -2,11 +2,14 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 
+using IdentityServer4;
 using IdentityServer4.ResponseHandling;
 using IdentityServer4.Services;
 using IdentityServer4.Stores;
 using IdentityServer4.Validation;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using System;
+using System.Net.Http;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -92,7 +95,7 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             builder.Services.TryAddTransient(typeof(T));
             builder.Services.AddTransient<IClientStore, ValidatingClientStore<T>>();
-            
+
             return builder;
         }
 
@@ -106,6 +109,33 @@ namespace Microsoft.Extensions.DependencyInjection
            where T : class, IResourceStore
         {
             builder.Services.AddTransient<IResourceStore, T>();
+
+            return builder;
+        }
+
+        /// <summary>
+        /// Adds a device flow store.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="builder">The builder.</param>
+        public static IIdentityServerBuilder AddDeviceFlowStore<T>(this IIdentityServerBuilder builder)
+            where T : class, IDeviceFlowStore
+        {
+            builder.Services.AddTransient<IDeviceFlowStore, T>();
+
+            return builder;
+        }
+
+        /// <summary>
+        /// Adds a persisted grant store.
+        /// </summary>
+        /// <typeparam name="T">The type of the concrete grant store that is registered in DI.</typeparam>
+        /// <param name="builder">The builder.</param>
+        /// <returns>The builder.</returns>
+        public static IIdentityServerBuilder AddPersistedGrantStore<T>(this IIdentityServerBuilder builder)
+            where T : class, IPersistedGrantStore
+        {
+            builder.Services.AddTransient<IPersistedGrantStore, T>();
 
             return builder;
         }
@@ -180,7 +210,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             return builder;
         }
-        
+
         /// <summary>
         /// Adds the client store cache.
         /// </summary>
@@ -202,7 +232,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <param name="builder">The builder.</param>
         /// <returns></returns>
         public static IIdentityServerBuilder AddAuthorizeInteractionResponseGenerator<T>(this IIdentityServerBuilder builder)
-            where T: class, IAuthorizeInteractionResponseGenerator
+            where T : class, IAuthorizeInteractionResponseGenerator
         {
             builder.Services.AddTransient<IAuthorizeInteractionResponseGenerator, T>();
 
@@ -262,6 +292,69 @@ namespace Microsoft.Extensions.DependencyInjection
             builder.Services.AddTransient<IClientConfigurationValidator, T>();
 
             return builder;
+        }
+
+        /// <summary>
+        /// Adds the X509 secret validators for mutual TLS.
+        /// </summary>
+        /// <param name="builder">The builder.</param>
+        /// <returns></returns>
+        public static IIdentityServerBuilder AddMutualTlsSecretValidators(this IIdentityServerBuilder builder)
+        {
+            builder.AddSecretParser<MutualTlsSecretParser>();
+            builder.AddSecretValidator<X509ThumbprintSecretValidator>();
+            builder.AddSecretValidator<X509NameSecretValidator>();
+
+            return builder;
+        }
+
+        /// <summary>
+        /// Adds a custom back-channel logout service.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="builder">The builder.</param>
+        /// <returns></returns>
+        public static IIdentityServerBuilder AddBackChannelLogoutService<T>(this IIdentityServerBuilder builder)
+            where T : class, IBackChannelLogoutService
+        {
+            builder.Services.AddTransient<IBackChannelLogoutService, T>();
+
+            return builder;
+        }
+
+        /// <summary>
+        /// Adds configuration for the HttpClient used for back-channel logout notifications.
+        /// </summary>
+        /// <param name="builder">The builder.</param>
+        /// <param name="configureClient">The configruation callback.</param>
+        /// <returns></returns>
+        public static IHttpClientBuilder AddBackChannelLogoutHttpClient(this IIdentityServerBuilder builder, Action<HttpClient> configureClient = null)
+        {
+            if (configureClient != null)
+            {
+                return builder.Services.AddHttpClient<BackChannelLogoutHttpClient>(configureClient);
+            }
+            else
+            {
+                return builder.Services.AddHttpClient<BackChannelLogoutHttpClient>();
+            }
+        }
+
+
+        /// <summary>
+        /// Adds configuration for the HttpClient used for JWT request_uri requests.
+        /// </summary>
+        /// <param name="builder">The builder.</param>
+        /// <param name="configureClient">The configruation callback.</param>
+        /// <returns></returns>
+        public static IHttpClientBuilder AddJwtRequestUriHttpClient(this IIdentityServerBuilder builder, Action<HttpClient> configureClient = null)
+        {
+            if (configureClient != null)
+            {
+                return builder.Services.AddHttpClient<JwtRequestUriHttpClient>(configureClient);
+            }
+
+            return builder.Services.AddHttpClient<JwtRequestUriHttpClient>();
         }
     }
 }

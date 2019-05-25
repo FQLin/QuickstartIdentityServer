@@ -1,13 +1,13 @@
-﻿// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
+// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 
+using System.Collections.Generic;
 using IdentityModel;
 using IdentityServer4.Extensions;
 using IdentityServer4.Validation;
-using System.Collections.Generic;
 
-namespace IdentityServer4.Logging
+namespace IdentityServer4.Logging.Models
 {
     internal class TokenRequestValidationLog
     {
@@ -26,10 +26,14 @@ namespace IdentityServer4.Logging
 
         public Dictionary<string, string> Raw { get; set; }
 
-        private static readonly string[] SensitiveValuesFilter = {
+        private static readonly string[] SensitiveValuesFilter =
+        {
             OidcConstants.TokenRequest.ClientSecret,
             OidcConstants.TokenRequest.Password,
-            OidcConstants.TokenRequest.ClientAssertion
+            OidcConstants.TokenRequest.ClientAssertion,
+            OidcConstants.TokenRequest.RefreshToken,
+            OidcConstants.TokenRequest.DeviceCode
+
         };
 
         public TokenRequestValidationLog(ValidatedTokenRequest request)

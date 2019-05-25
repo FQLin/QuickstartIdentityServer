@@ -1,14 +1,14 @@
-﻿// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
+// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 
+using System.Collections.Generic;
+using System.Linq;
 using IdentityModel;
 using IdentityServer4.Extensions;
 using IdentityServer4.Validation;
-using System.Collections.Generic;
-using System.Linq;
 
-namespace IdentityServer4.Logging
+namespace IdentityServer4.Logging.Models
 {
     internal class AuthorizeRequestValidationLog
     {
@@ -22,7 +22,7 @@ namespace IdentityServer4.Logging
         public string ResponseMode { get; set; }
         public string GrantType { get; set; }
         public string RequestedScopes { get; set; }
-        
+
         public string State { get; set; }
         public string UiLocales { get; set; }
         public string Nonce { get; set; }
@@ -37,7 +37,7 @@ namespace IdentityServer4.Logging
 
         public AuthorizeRequestValidationLog(ValidatedAuthorizeRequest request)
         {
-            Raw = request.Raw.ToDictionary();
+            Raw = request.Raw.ToScrubbedDictionary(OidcConstants.AuthorizeRequest.IdTokenHint);
 
             if (request.Client != null)
             {
@@ -64,7 +64,7 @@ namespace IdentityServer4.Logging
             {
                 AuthenticationContextReferenceClasses = request.AuthenticationContextReferenceClasses;
             }
-                
+
             RedirectUri = request.RedirectUri;
             ResponseType = request.ResponseType;
             ResponseMode = request.ResponseMode;
@@ -73,7 +73,7 @@ namespace IdentityServer4.Logging
             State = request.State;
             UiLocales = request.UiLocales;
             Nonce = request.Nonce;
-            
+
             DisplayMode = request.DisplayMode;
             PromptMode = request.PromptMode;
             LoginHint = request.LoginHint;

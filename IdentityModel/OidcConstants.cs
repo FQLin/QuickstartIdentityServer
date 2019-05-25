@@ -25,6 +25,8 @@ namespace IdentityModel
             public const string AcrValues = "acr_values";
             public const string CodeChallenge = "code_challenge";
             public const string CodeChallengeMethod = "code_challenge_method";
+            public const string Request = "request";
+            public const string RequestUri = "request_uri";
         }
 
         public static class AuthorizeErrors
@@ -64,6 +66,16 @@ namespace IdentityModel
             public const string ErrorDescription = "error_description";
         }
 
+        public static class DeviceAuthorizationResponse
+        {
+            public const string DeviceCode = "device_code";
+            public const string UserCode = "user_code";
+            public const string VerificationUri = "verification_uri";
+            public const string VerificationUriComplete = "verification_uri_complete";
+            public const string ExpiresIn = "expires_in";
+            public const string Interval = "interval";
+        }
+
         public static class EndSessionRequest
         {
             public const string IdTokenHint = "id_token_hint";
@@ -92,6 +104,15 @@ namespace IdentityModel
             public const string Algorithm = "alg";
             public const string Key = "key";
             public const string DeviceCode = "device_code";
+
+            // token exchange
+            public const string Resource = "resource";
+            public const string Audience = "audience";
+            public const string RequestedTokenType = "requested_token_type";
+            public const string SubjectToken = "subject_token";
+            public const string SubjectTokenType = "subject_token_type";
+            public const string ActorToken = "actor_token";
+            public const string ActorTokenType = "actor_token_type";
         }
 
         public static class TokenRequestTypes
@@ -125,6 +146,8 @@ namespace IdentityModel
             public const string Error = "error";
             public const string ErrorDescription = "error_description";
             public const string BearerTokenType = "Bearer";
+            public const string IssuedTokenType = "issued_token_type";
+            public const string Scope = "scope";
         }
 
         public static class TokenIntrospectionRequest
@@ -186,6 +209,15 @@ namespace IdentityModel
             public const string RefreshToken = "refresh_token";
         }
 
+        public static class TokenTypeIdentifiers
+        {
+            public const string AccessToken = "urn:ietf:params:oauth:token-type:access_token";
+            public const string IdentityToken = "urn:ietf:params:oauth:token-type:id_token";
+            public const string RefreshToken = "urn:ietf:params:oauth:token-type:refresh_token";
+            public const string Saml11 = "urn:ietf:params:oauth:token-type:saml1";
+            public const string Saml2 = "urn:ietf:params:oauth:token-type:saml2";
+        }
+
         public static class AuthenticationSchemes
         {
             public const string AuthorizationHeaderBearer = "Bearer";
@@ -207,11 +239,13 @@ namespace IdentityModel
             public const string Saml2Bearer = "urn:ietf:params:oauth:grant-type:saml2-bearer";
             public const string JwtBearer = "urn:ietf:params:oauth:grant-type:jwt-bearer";
             public const string DeviceCode = "urn:ietf:params:oauth:grant-type:device_code";
+            public const string TokenExchange = "urn:ietf:params:oauth:grant-type:token-exchange";
         }
 
         public static class ClientAssertionTypes
         {
             public const string JwtBearer = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
+            public const string SamlBearer = "urn:ietf:params:oauth:client-assertion-type:saml2-bearer";
         }
 
         public static class ResponseTypes
@@ -267,6 +301,8 @@ namespace IdentityModel
             public const string PostBody = "client_secret_post";
             public const string BasicAuthentication = "client_secret_basic";
             public const string PrivateKeyJwt = "private_key_jwt";
+            public const string TlsClientAuth = "tls_client_auth";
+            public const string SelfSignedTlsClientAuth = "self_signed_tls_client_auth";
         }
 
         public static class AuthenticationMethods
@@ -290,7 +326,7 @@ namespace IdentityModel
             public const string ConfirmationByTelephone = "tel";
             public const string UserPresenceTest = "user";
             public const string VoiceBiometric = "vbm";
-            public const string WindowsIntegratedAuthentication = "wia";           
+            public const string WindowsIntegratedAuthentication = "wia";
         }
 
         public static class Algorithms
@@ -337,6 +373,7 @@ namespace IdentityModel
             public const string EndSessionEndpoint = "end_session_endpoint";
             public const string CheckSessionIframe = "check_session_iframe";
             public const string RegistrationEndpoint = "registration_endpoint";
+            public const string MtlsEndpointAliases = "mtls_endpoint_aliases";
 
             // common capabilities
             public const string FrontChannelLogoutSupported = "frontchannel_logout_supported";
@@ -375,6 +412,7 @@ namespace IdentityModel
             public const string UserInfoEncryptionAlgorithmsSupported = "userinfo_encryption_alg_values_supported";
             public const string UserInfoEncryptionEncValuesSupported = "userinfo_encryption_enc_values_supported";
             public const string UserInfoSigningAlgorithmsSupported = "userinfo_signing_alg_values_supported";
+            public const string TlsClientCertificateBoundAccessTokens = "tls_client_certificate_bound_access_tokens";
         }
 
         public static class Events
@@ -385,6 +423,22 @@ namespace IdentityModel
         public static class BackChannelLogoutRequest
         {
             public const string LogoutToken = "logout_token";
+        }
+
+        public static class StandardScopes
+        {
+            /// <summary>REQUIRED. Informs the Authorization Server that the Client is making an OpenID Connect request. If the <c>openid</c> scope value is not present, the behavior is entirely unspecified.</summary>
+            public const string OpenId = "openid";
+            /// <summary>OPTIONAL. This scope value requests access to the End-User's default profile Claims, which are: <c>name</c>, <c>family_name</c>, <c>given_name</c>, <c>middle_name</c>, <c>nickname</c>, <c>preferred_username</c>, <c>profile</c>, <c>picture</c>, <c>website</c>, <c>gender</c>, <c>birthdate</c>, <c>zoneinfo</c>, <c>locale</c>, and <c>updated_at</c>.</summary>
+            public const string Profile = "profile";
+            /// <summary>OPTIONAL. This scope value requests access to the <c>email</c> and <c>email_verified</c> Claims.</summary>
+            public const string Email = "email";
+            /// <summary>OPTIONAL. This scope value requests access to the <c>address</c> Claim.</summary>
+            public const string Address = "address";
+            /// <summary>OPTIONAL. This scope value requests access to the <c>phone_number</c> and <c>phone_number_verified</c> Claims.</summary>
+            public const string Phone = "phone";
+            /// <summary>This scope value MUST NOT be used with the OpenID Connect Implicit Client Implementer's Guide 1.0. See the OpenID Connect Basic Client Implementer's Guide 1.0 (http://openid.net/specs/openid-connect-implicit-1_0.html#OpenID.Basic) for its usage in that subset of OpenID Connect.</summary>
+            public const string OfflineAccess = "offline_access";
         }
     }
 }

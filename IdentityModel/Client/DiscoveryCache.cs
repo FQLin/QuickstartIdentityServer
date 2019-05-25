@@ -14,31 +14,22 @@ namespace IdentityModel.Client
     public class DiscoveryCache : IDiscoveryCache
     {
         private DateTime _nextReload = DateTime.MinValue;
-        private AsyncLazy<DiscoveryResponse> _lazyResponse;
+        private AsyncLazy<DiscoveryDocumentResponse> _lazyResponse;
 
         private readonly DiscoveryPolicy _policy;
-        private readonly Func<HttpClient> _getHttpClient;
+        private readonly Func<HttpMessageInvoker> _getHttpClient;
         private readonly string _authority;
 
         /// <summary>
         /// Initialize instance of DiscoveryCache with passed authority.
         /// </summary>
         /// <param name="authority">Base address or discovery document endpoint.</param>
-        /// <param name="client">The client.</param>
         /// <param name="policy">The policy.</param>
-        public DiscoveryCache(string authority, HttpClient client = null, DiscoveryPolicy policy = null)
+        public DiscoveryCache(string authority, DiscoveryPolicy policy = null)
         {
             _authority = authority;
             _policy = policy ?? new DiscoveryPolicy();
-
-            if (client == null)
-            {
-                _getHttpClient = () => new HttpClient();
-            }
-            else
-            {
-                _getHttpClient = () => client;
-            }
+            _getHttpClient = () => new HttpClient();
         }
 
         /// <summary>
@@ -47,21 +38,12 @@ namespace IdentityModel.Client
         /// <param name="authority">Base address or discovery document endpoint.</param>
         /// <param name="httpClientFunc">The HTTP client function.</param>
         /// <param name="policy">The policy.</param>
-        public DiscoveryCache(string authority, Func<HttpClient> httpClientFunc, DiscoveryPolicy policy = null)
+        public DiscoveryCache(string authority, Func<HttpMessageInvoker> httpClientFunc, DiscoveryPolicy policy = null)
         {
             _authority = authority;
             _policy = policy ?? new DiscoveryPolicy();
             _getHttpClient = httpClientFunc ?? throw new ArgumentNullException(nameof(httpClientFunc));
         }
-
-        /// <summary>
-        /// Initialize instance of DiscoveryCache with passed DiscoveryClient.
-        /// </summary>
-        /// <param name="client">DiscoveryClient to use for obtaining discovery document.</param>
-        [Obsolete("Will be removed in a future version")]
-        public DiscoveryCache(DiscoveryClient client)
-            : this(client.Authority, new HttpClient(), client.Policy)
-        { }
 
         /// <summary>
         /// Frequency to refresh discovery document. Defaults to 24 hours.
@@ -72,7 +54,7 @@ namespace IdentityModel.Client
         /// Get the DiscoveryResponse either from cache or from discovery endpoint.
         /// </summary>
         /// <returns></returns>
-        public Task<DiscoveryResponse> GetAsync()
+        public Task<DiscoveryDocumentResponse> GetAsync()
         {
             if (_nextReload <= DateTime.UtcNow)
             {
@@ -87,10 +69,10 @@ namespace IdentityModel.Client
         /// </summary>
         public void Refresh()
         {
-            _lazyResponse = new AsyncLazy<DiscoveryResponse>(GetResponseAsync);
+            _lazyResponse = new AsyncLazy<DiscoveryDocumentResponse>(GetResponseAsync);
         }
 
-        private async Task<DiscoveryResponse> GetResponseAsync()
+        private async Task<DiscoveryDocumentResponse> GetResponseAsync()
         {
             var result = await _getHttpClient().GetDiscoveryDocumentAsync(new DiscoveryDocumentRequest
             {
@@ -98,7 +80,16 @@ namespace IdentityModel.Client
                 Policy = _policy
             });
 
-            _nextReload = DateTime.UtcNow.Add(CacheDuration);
+            if (result.IsError)
+            {
+                Refresh();
+                _nextReload = DateTime.MinValue;
+            }
+            else
+            {
+                _nextReload = DateTime.UtcNow.Add(CacheDuration);
+            }
+
             return result;
         }
     }

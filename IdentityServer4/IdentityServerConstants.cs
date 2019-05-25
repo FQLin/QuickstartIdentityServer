@@ -1,4 +1,4 @@
-﻿// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
+// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 #pragma warning disable 1591
@@ -12,6 +12,30 @@ namespace IdentityServer4
         public const string SignoutScheme = "idsrv";
         public const string ExternalCookieAuthenticationScheme = "idsrv.external";
         public const string DefaultCheckSessionCookieName = "idsrv.session";
+        public const string AccessTokenAudience = "{0}resources";
+
+        public const string JwtRequestClientKey = "idsrv.jwtrequesturi.client";
+
+        /// <summary>
+        /// Constants for local IdentityServer access token authentication.
+        /// </summary>
+        public static class LocalApi
+        {
+            /// <summary>
+            /// The authentication scheme when using the AddLocalApi helper.
+            /// </summary>
+            public const string AuthenticationScheme = "IdentityServerAccessToken";
+
+            /// <summary>
+            /// The API scope name when using the AddLocalApiAuthentication helper.
+            /// </summary>
+            public const string ScopeName = "IdentityServerApi";
+
+            /// <summary>
+            /// The authorization policy name when using the AddLocalApiAuthentication helper.
+            /// </summary>
+            public const string PolicyName = AuthenticationScheme;
+        }
 
         public static class ProtocolTypes
         {
@@ -36,7 +60,7 @@ namespace IdentityServer4
             public const string NoSecret = "NoSecret";
             public const string SharedSecret = "SharedSecret";
             public const string X509Certificate = "X509Certificate";
-            public const string JwtBearer = "urn:ietf:params:oauth:grant-type:jwt-bearer";
+            public const string JwtBearer = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
         }
 
         public static class SecretTypes
@@ -45,6 +69,7 @@ namespace IdentityServer4
             public const string X509CertificateThumbprint = "X509Thumbprint";
             public const string X509CertificateName = "X509Name";
             public const string X509CertificateBase64 = "X509CertificateBase64";
+            public const string JsonWebKey = "JWK";
         }
 
         public static class ProfileDataCallers
@@ -64,6 +89,7 @@ namespace IdentityServer4
             public const string RefreshTokenValidation = "RefreshTokenValidation";
             public const string AuthorizationCodeValidation = "AuthorizationCodeValidation";
             public const string UserInfoRequestValidation = "UserInfoRequestValidation";
+            public const string DeviceCodeValidation = "DeviceCodeValidation";
         }
 
         public static class StandardScopes
@@ -88,6 +114,18 @@ namespace IdentityServer4
             public const string ReferenceToken = "reference_token";
             public const string RefreshToken = "refresh_token";
             public const string UserConsent = "user_consent";
+            public const string DeviceCode = "device_code";
+            public const string UserCode = "user_code";
+        }
+
+        public static class UserCodeTypes
+        {
+            public const string Numeric = "Numeric";
+        }
+
+        public class MutualTls
+        {
+            public const string X509CertificateItemKey = "IdentityServer:MTLS:X509Certificate";
         }
     }
 }

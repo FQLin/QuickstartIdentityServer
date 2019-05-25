@@ -1,4 +1,4 @@
-﻿// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
+// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 
@@ -15,16 +15,18 @@ namespace Microsoft.AspNetCore.Http
 {
     public static class HttpResponseExtensions
     {
-        public static async Task WriteJsonAsync(this HttpResponse response, object o)
+        public static async Task WriteJsonAsync(this HttpResponse response, object o, string contentType = null)
         {
             var json = ObjectSerializer.ToString(o);
-            await response.WriteJsonAsync(json);
+            await response.WriteJsonAsync(json, contentType);
+            await response.Body.FlushAsync();
         }
 
-        public static async Task WriteJsonAsync(this HttpResponse response, string json)
+        public static async Task WriteJsonAsync(this HttpResponse response, string json, string contentType = null)
         {
-            response.ContentType = "application/json; charset=UTF-8";
+            response.ContentType = contentType ?? "application/json; charset=UTF-8";
             await response.WriteAsync(json);
+            await response.Body.FlushAsync();
         }
 
         public static void SetCache(this HttpResponse response, int maxAge)
@@ -48,6 +50,11 @@ namespace Microsoft.AspNetCore.Http
             {
                 response.Headers.Add("Cache-Control", "no-store, no-cache, max-age=0");
             }
+            else
+            {
+                response.Headers["Cache-Control"] = "no-store, no-cache, max-age=0";
+            }
+
             if (!response.Headers.ContainsKey("Pragma"))
             {
                 response.Headers.Add("Pragma", "no-cache");
@@ -58,6 +65,7 @@ namespace Microsoft.AspNetCore.Http
         {
             response.ContentType = "text/html; charset=UTF-8";
             await response.WriteAsync(html, Encoding.UTF8);
+            await response.Body.FlushAsync();
         }
 
         public static void RedirectToAbsoluteUrl(this HttpResponse response, string url)
@@ -70,7 +78,7 @@ namespace Microsoft.AspNetCore.Http
             response.Redirect(url);
         }
 
-        internal static void AddScriptCspHeaders(this HttpResponse response, CspOptions options, string hash)
+        public static void AddScriptCspHeaders(this HttpResponse response, CspOptions options, string hash)
         {
             var csp1part = options.Level == CspLevel.One ? "'unsafe-inline' " : string.Empty;
             var cspHeader = $"default-src 'none'; script-src {csp1part}'{hash}'";
@@ -78,7 +86,7 @@ namespace Microsoft.AspNetCore.Http
             AddCspHeaders(response.Headers, options, cspHeader);
         }
 
-        internal static void AddStyleCspHeaders(this HttpResponse response, CspOptions options, string hash, string frameSources)
+        public static void AddStyleCspHeaders(this HttpResponse response, CspOptions options, string hash, string frameSources)
         {
             var csp1part = options.Level == CspLevel.One ? "'unsafe-inline' " : string.Empty;
             var cspHeader = $"default-src 'none'; style-src {csp1part}'{hash}'";
@@ -91,7 +99,7 @@ namespace Microsoft.AspNetCore.Http
             AddCspHeaders(response.Headers, options, cspHeader);
         }
 
-        private static void AddCspHeaders(IHeaderDictionary headers, CspOptions options, string cspHeader)
+        public static void AddCspHeaders(IHeaderDictionary headers, CspOptions options, string cspHeader)
         {
             if (!headers.ContainsKey("Content-Security-Policy"))
             {

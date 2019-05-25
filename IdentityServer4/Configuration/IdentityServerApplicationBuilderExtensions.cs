@@ -2,15 +2,15 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 
-using IdentityServer4.Hosting;
-using IdentityServer4.Stores;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.DependencyInjection;
-using System;
-using Microsoft.AspNetCore.Authentication;
-using System.Threading.Tasks;
 using IdentityServer4.Configuration;
 using IdentityServer4.Extensions;
+using IdentityServer4.Hosting;
+using IdentityServer4.Stores;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Threading.Tasks;
 
 namespace Microsoft.AspNetCore.Builder
 {
@@ -39,6 +39,7 @@ namespace Microsoft.AspNetCore.Builder
             // related: https://github.com/aspnet/Security/issues/1399
             app.UseAuthentication();
 
+            app.UseMiddleware<MutualTlsTokenEndpointMiddleware>();
             app.UseMiddleware<IdentityServerMiddleware>();
 
             return app;
@@ -50,6 +51,7 @@ namespace Microsoft.AspNetCore.Builder
             if (loggerFactory == null) throw new ArgumentNullException(nameof(loggerFactory));
 
             var logger = loggerFactory.CreateLogger("IdentityServer4.Startup");
+            logger.LogInformation("Starting IdentityServer4 version {version}", typeof(IdentityServerApplicationBuilderExtensions).Assembly.GetName().Version.ToString());
 
             var scopeFactory = app.ApplicationServices.GetService<IServiceScopeFactory>();
 
@@ -76,19 +78,39 @@ namespace Microsoft.AspNetCore.Builder
 
         private static async Task ValidateAsync(IServiceProvider services, ILogger logger)
         {
+            var options = services.GetRequiredService<IdentityServerOptions>();
             var schemes = services.GetRequiredService<IAuthenticationSchemeProvider>();
 
-            if (await schemes.GetDefaultAuthenticateSchemeAsync() == null)
+
+            if (await schemes.GetDefaultAuthenticateSchemeAsync() == null && options.Authentication.CookieAuthenticationScheme == null)
             {
-                logger.LogWarning("No default authentication scheme has been set. Setting a default scheme is required.");
+                logger.LogWarning("No authentication scheme has been set. Setting either a default authentication scheme or a CookieAuthenticationScheme on IdentityServerOptions is required.");
             }
             else
             {
-                logger.LogDebug("Using {scheme} as default scheme for authentication", (await schemes.GetDefaultAuthenticateSchemeAsync())?.Name);
-                logger.LogDebug("Using {scheme} as default scheme for sign-in", (await schemes.GetDefaultSignInSchemeAsync())?.Name);
-                logger.LogDebug("Using {scheme} as default scheme for sign-out", (await schemes.GetDefaultSignOutSchemeAsync())?.Name);
-                logger.LogDebug("Using {scheme} as default scheme for challenge", (await schemes.GetDefaultChallengeSchemeAsync())?.Name);
-                logger.LogDebug("Using {scheme} as default scheme for forbid", (await schemes.GetDefaultForbidSchemeAsync())?.Name);
+                AuthenticationScheme authenticationScheme = null;
+
+                if (options.Authentication.CookieAuthenticationScheme != null)
+                {
+                    authenticationScheme = await schemes.GetSchemeAsync(options.Authentication.CookieAuthenticationScheme);
+                    logger.LogInformation("Using explicitly configured authentication scheme {scheme} for IdentityServer", options.Authentication.CookieAuthenticationScheme);
+                }
+                else
+                {
+                    authenticationScheme = await schemes.GetDefaultAuthenticateSchemeAsync();
+                    logger.LogInformation("Using the default authentication scheme {scheme} for IdentityServer", authenticationScheme.Name);
+                }
+
+                if (!typeof(IAuthenticationSignInHandler).IsAssignableFrom(authenticationScheme.HandlerType))
+                {
+                    logger.LogError("Authentication scheme {scheme} is configured for IdentityServer, but it is not a scheme that supports signin (like cookies). Either configure the default authentication scheme with cookies or set the CookieAuthenticationScheme on the IdentityServerOptions.", authenticationScheme.Name);
+                }
+
+                logger.LogDebug("Using {scheme} as default ASP.NET Core scheme for authentication", (await schemes.GetDefaultAuthenticateSchemeAsync())?.Name);
+                logger.LogDebug("Using {scheme} as default ASP.NET Core scheme for sign-in", (await schemes.GetDefaultSignInSchemeAsync())?.Name);
+                logger.LogDebug("Using {scheme} as default ASP.NET Core scheme for sign-out", (await schemes.GetDefaultSignOutSchemeAsync())?.Name);
+                logger.LogDebug("Using {scheme} as default ASP.NET Core scheme for challenge", (await schemes.GetDefaultChallengeSchemeAsync())?.Name);
+                logger.LogDebug("Using {scheme} as default ASP.NET Core scheme for forbid", (await schemes.GetDefaultForbidSchemeAsync())?.Name);
             }
         }
 
@@ -106,9 +128,10 @@ namespace Microsoft.AspNetCore.Builder
                 logger.LogDebug("PublicOrigin explicitly set to {0}", options.PublicOrigin);
             }
 
-            if (options.UserInteraction.LoginUrl.IsMissing()) throw new InvalidOperationException("LoginUrl is not configured");
-            if (options.UserInteraction.LoginReturnUrlParameter.IsMissing()) throw new InvalidOperationException("LoginReturnUrlParameter is not configured");
-            if (options.UserInteraction.LogoutUrl.IsMissing()) throw new InvalidOperationException("LogoutUrl is not configured");
+            // todo: perhaps different logging messages?
+            //if (options.UserInteraction.LoginUrl.IsMissing()) throw new InvalidOperationException("LoginUrl is not configured");
+            //if (options.UserInteraction.LoginReturnUrlParameter.IsMissing()) throw new InvalidOperationException("LoginReturnUrlParameter is not configured");
+            //if (options.UserInteraction.LogoutUrl.IsMissing()) throw new InvalidOperationException("LogoutUrl is not configured");
             if (options.UserInteraction.LogoutIdParameter.IsMissing()) throw new InvalidOperationException("LogoutIdParameter is not configured");
             if (options.UserInteraction.ErrorUrl.IsMissing()) throw new InvalidOperationException("ErrorUrl is not configured");
             if (options.UserInteraction.ErrorIdParameter.IsMissing()) throw new InvalidOperationException("ErrorIdParameter is not configured");

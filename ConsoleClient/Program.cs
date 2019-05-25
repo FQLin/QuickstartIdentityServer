@@ -12,30 +12,47 @@ namespace ConsoleClient
 
         private static async Task MainAsync()
         {
-            DiscoveryResponse discoveryResponse = await DiscoveryClient.GetAsync("http://localhost:5000");
-            //获取令牌
-            TokenClient tokenClient = new TokenClient(discoveryResponse.TokenEndpoint, "client", "secret");
-            TokenResponse tokenResponse = await tokenClient.RequestClientCredentialsAsync("api1");
+            // discover endpoints from metadata
+            var client = new HttpClient();
+            var disco = await client.GetDiscoveryDocumentAsync("http://localhost:5000");
+            if (disco.IsError)
+            {
+                Console.WriteLine(disco.Error);
+                return;
+            }
+
+            // request token
+            var tokenResponse = await client.RequestClientCredentialsTokenAsync(new ClientCredentialsTokenRequest
+            {
+                Address = disco.TokenEndpoint,
+                ClientId = "client",
+                ClientSecret = "secret",
+
+                Scope = "api1"
+            });
+
             if (tokenResponse.IsError)
             {
                 Console.WriteLine(tokenResponse.Error);
                 return;
             }
-            Console.WriteLine($"json:{tokenResponse.Json}");
-            Console.WriteLine($"accesstoken:{tokenResponse.AccessToken}");
 
-            using (var client = new HttpClient())
+            Console.WriteLine(tokenResponse.Json);
+            Console.WriteLine("\n\n");
+
+            // call api
+            var apiClient = new HttpClient();
+            apiClient.SetBearerToken(tokenResponse.AccessToken);
+
+            var response = await apiClient.GetAsync("http://localhost:5001/identity");
+            if (!response.IsSuccessStatusCode)
             {
-                client.SetBearerToken(tokenResponse.AccessToken);
-                HttpResponseMessage response = await client.GetAsync("http://localhost:5001/identity");
-                if (response.IsSuccessStatusCode)
-                {
-                    Console.WriteLine(JArray.Parse(await response.Content.ReadAsStringAsync()));
-                }
-                else
-                {
-                    Console.WriteLine(response.StatusCode);
-                }
+                Console.WriteLine(response.StatusCode);
+            }
+            else
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                Console.WriteLine(JArray.Parse(content));
             }
 
             Console.ReadKey();

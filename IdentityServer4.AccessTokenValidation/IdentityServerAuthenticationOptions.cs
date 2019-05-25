@@ -19,6 +19,7 @@ namespace IdentityServer4.AccessTokenValidation
     /// <summary>
     /// Options for IdentityServer authentication
     /// </summary>
+    /// <seealso cref="Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions" />
     public class IdentityServerAuthenticationOptions : AuthenticationSchemeOptions
     {
         static readonly Func<HttpRequest, string> InternalTokenRetriever = request => request.HttpContext.Items[IdentityServerAuthenticationDefaults.TokenItemsKey] as string;
@@ -83,6 +84,19 @@ namespace IdentityServer4.AccessTokenValidation
         /// Specifies ttl for introspection response caches
         /// </summary>
         public TimeSpan CacheDuration { get; set; } = TimeSpan.FromMinutes(10);
+
+        /// <summary>
+        /// Specifies the prefix of the cache key (token).
+        /// </summary>
+        public string CacheKeyPrefix { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Gets or sets the policay for the introspection discovery document.
+        /// </summary>
+        /// <value>
+        /// The introspection discovery policy.
+        /// </value>
+        public DiscoveryPolicy IntrospectionDiscoveryPolicy { get; set; } = new DiscoveryPolicy();
 
         /// <summary>
         /// specifies whether the token should be saved in the authentication properties
@@ -160,7 +174,7 @@ namespace IdentityServer4.AccessTokenValidation
 
             if (DiscoveryDocumentRefreshInterval.HasValue)
             {
-                var parsedUrl = DiscoveryClient.ParseUrl(Authority);
+                var parsedUrl = DiscoveryEndpoint.ParseUrl(Authority);
 
                 var httpClient = new HttpClient(JwtBackChannelHandler ?? new HttpClientHandler())
                 {
@@ -234,24 +248,13 @@ namespace IdentityServer4.AccessTokenValidation
             introspectionOptions.RoleClaimType = RoleClaimType;
             introspectionOptions.TokenRetriever = InternalTokenRetriever;
             introspectionOptions.SaveToken = SaveToken;
+            introspectionOptions.DiscoveryPolicy = IntrospectionDiscoveryPolicy;
 
             introspectionOptions.EnableCaching = EnableCaching;
             introspectionOptions.CacheDuration = CacheDuration;
-
-            introspectionOptions.DiscoveryTimeout = BackChannelTimeouts;
-            introspectionOptions.IntrospectionTimeout = BackChannelTimeouts;
+            introspectionOptions.CacheKeyPrefix = CacheKeyPrefix;
 
             introspectionOptions.DiscoveryPolicy.RequireHttps = RequireHttpsMetadata;
-
-            if (IntrospectionBackChannelHandler != null)
-            {
-                introspectionOptions.IntrospectionHttpHandler = IntrospectionBackChannelHandler;
-            }
-
-            if (IntrospectionDiscoveryHandler != null)
-            {
-                introspectionOptions.DiscoveryHttpHandler = IntrospectionDiscoveryHandler;
-            }
         }
     }
 }
