@@ -7,19 +7,19 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuickstartIdentityServer", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "IdentityServer", "IdentityServer", "{03B244C9-EDD0-4D66-A8E9-2C93CC7E4BA2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityModel", "IdentityModel\IdentityModel.csproj", "{7DC547D1-4293-443E-9D19-F15AC18AF7B2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityModel", "IdentityServer\IdentityModel\IdentityModel.csproj", "{7DC547D1-4293-443E-9D19-F15AC18AF7B2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityServer4", "IdentityServer4\IdentityServer4.csproj", "{C94B15D9-723C-4B24-882B-C2C0DAAD4740}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityServer4", "IdentityServer\IdentityServer4\IdentityServer4.csproj", "{C94B15D9-723C-4B24-882B-C2C0DAAD4740}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityServer4.AccessTokenValidation", "IdentityServer4.AccessTokenValidation\IdentityServer4.AccessTokenValidation.csproj", "{64B44505-D982-4982-8D5F-0959C8AC09E1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityServer4.AccessTokenValidation", "IdentityServer\IdentityServer4.AccessTokenValidation\IdentityServer4.AccessTokenValidation.csproj", "{64B44505-D982-4982-8D5F-0959C8AC09E1}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "APIReSource", "APIReSource", "{882A1749-23EE-4001-A63F-18D817B5F725}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API", "API\API.csproj", "{A65A0F43-1379-444F-AC85-597164C2E876}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API", "APIReSource\API\API.csproj", "{A65A0F43-1379-444F-AC85-597164C2E876}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Client", "Client", "{12881CB4-4324-4D9D-B0ED-9BC23D8B0215}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleClient", "ConsoleClient\ConsoleClient.csproj", "{C77565F5-C5FE-4470-8418-BE45AFF58F3B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleClient", "Client\ConsoleClient\ConsoleClient.csproj", "{C77565F5-C5FE-4470-8418-BE45AFF58F3B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
